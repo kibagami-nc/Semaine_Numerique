@@ -4,35 +4,39 @@ import random
 import time
 import threading
 
-class PopUpGame:
+class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
     def __init__(self):
         self.score = 0
-        self.windows_to_close = 10  # Nombre de fenêtres à fermer
+        self.time_limit = 30  # Durée du jeu en secondes
+        self.time_remaining = 30 # Temps qu'il reste pour le jeu
         self.closed_windows = 0
         self.game_active = False
         self.popup_windows = []
         self.main_window = None
+        self.start_time = None
+        self.popup_delay = 2.0  # Délai initial entre les pop-ups
+        self.min_delay = 0.3  # Délai minimum entre les pop-ups
         
     def start_game(self):
         """Démarre le jeu principal"""
         self.main_window = tk.Tk()
-        self.main_window.title("Jeu Pop-Up - Fermez toutes les fenêtres!")
-        self.main_window.geometry("400x300")
-        self.main_window.configure(bg="#2c3e50")
-        
-        # Interface principale
+        self.main_window.title("Jeu Pop-Up - Défi Chronomètre!") # titre de la fenêtre
+        self.main_window.geometry("400x300") # taille de la fenêtre
+        self.main_window.configure(bg="#2c3e50") # couleur de fond
+
+        # Interface principale, page pour start le jeu
         title_label = tk.Label(
             self.main_window, 
-            text="JEU POP-UP", 
-            font=("Arial", 20, "bold"),
+            text="POP-UP", 
+            font=("Arial", 25, "bold"),
             fg="white",
             bg="#2c3e50"
         )
         title_label.pack(pady=20)
         
-        instruction_label = tk.Label(
+        instruction_label = tk.Label( # deuxième ligne d'instruction
             self.main_window,
-            text=f"Fermez {self.windows_to_close} fenêtres pop-up le plus vite possible!",
+            text=f"Fermez le maximum de fenêtres en {self.time_limit} secondes!",
             font=("Arial", 12),
             fg="white",
             bg="#2c3e50",
@@ -40,16 +44,25 @@ class PopUpGame:
         )
         instruction_label.pack(pady=10)
         
-        self.score_label = tk.Label(
+        self.score_label = tk.Label( # Affichage du score (3ème ligne)
             self.main_window,
-            text=f"Fenêtres fermées: {self.closed_windows}/{self.windows_to_close}",
+            text=f"Score: {self.closed_windows} fenêtres fermées",
             font=("Arial", 14),
             fg="#3498db",
             bg="#2c3e50"
         )
-        self.score_label.pack(pady=10)
+        self.score_label.pack(pady=5)
         
-        start_button = tk.Button(
+        self.time_label = tk.Label( # Affichage du temps restant
+            self.main_window,
+            text=f"Temps restant: {self.time_remaining}s",
+            font=("Arial", 14),
+            fg="#e74c3c",
+            bg="#2c3e50"
+        )
+        self.time_label.pack(pady=5)
+        
+        start_button = tk.Button( # Bouton pour commencer le jeu
             self.main_window,
             text="COMMENCER LE JEU",
             font=("Arial", 14, "bold"),
@@ -61,7 +74,7 @@ class PopUpGame:
         )
         start_button.pack(pady=20)
         
-        quit_button = tk.Button(
+        quit_button = tk.Button( # Bouton pour quitter le jeu
             self.main_window,
             text="Quitter",
             font=("Arial", 12),
@@ -77,22 +90,42 @@ class PopUpGame:
         """Commence la phase des pop-ups"""
         self.game_active = True
         self.closed_windows = 0
+        self.start_time = time.time()
+        self.time_remaining = self.time_limit
+        self.popup_delay = 2.0  # Reset du délai initial
         self.update_score()
         
+        # Démarrer le timer du jeu
+        threading.Thread(target=self.game_timer, daemon=True).start()
         # Démarrer la création de pop-ups en arrière-plan
         threading.Thread(target=self.create_popup_sequence, daemon=True).start()
     
+    def game_timer(self):
+        """Gère le timer du jeu"""
+        while self.game_active and self.time_remaining > 0:
+            time.sleep(0.1)  # Mise à jour toutes les 100ms
+            if self.game_active:
+                elapsed_time = time.time() - self.start_time
+                self.time_remaining = max(0, self.time_limit - elapsed_time)
+                self.update_time_display()
+        
+        if self.game_active:  # Le temps est écoulé
+            self.end_game()
+    
     def create_popup_sequence(self):
-        """Crée une séquence de fenêtres pop-up"""
-        for i in range(self.windows_to_close):
-            if not self.game_active:
-                break
-                
-            # Attendre un délai aléatoire entre chaque pop-up
-            time.sleep(random.uniform(0.5, 2.0))
-            
+        """Crée une séquence continue de fenêtres pop-up"""
+        popup_id = 0
+        while self.game_active and self.time_remaining > 0:
             # Créer une nouvelle fenêtre pop-up
-            self.create_popup_window(i)
+            self.create_popup_window(popup_id)
+            popup_id += 1
+            
+            # Attendre selon le délai actuel
+            time.sleep(self.popup_delay)
+            
+            # Réduire progressivement le délai basé sur le score
+            speed_factor = min(self.closed_windows * 0.05, 0.8)  # Max 80% de réduction
+            self.popup_delay = max(self.min_delay, 2.0 - (2.0 * speed_factor))
     
     def create_popup_window(self, window_id):
         """Crée une fenêtre pop-up individuelle"""
@@ -155,16 +188,19 @@ class PopUpGame:
             self.popup_windows.remove(popup_window)
             self.closed_windows += 1
             self.update_score()
-            
-            # Vérifier si toutes les fenêtres sont fermées
-            if self.closed_windows >= self.windows_to_close:
-                self.end_game()
     
     def update_score(self):
         """Met à jour l'affichage du score"""
         if hasattr(self, 'score_label'):
             self.score_label.config(
-                text=f"Fenêtres fermées: {self.closed_windows}/{self.windows_to_close}"
+                text=f"Score: {self.closed_windows} fenêtres fermées"
+            )
+    
+    def update_time_display(self):
+        """Met à jour l'affichage du temps restant"""
+        if hasattr(self, 'time_label'):
+            self.time_label.config(
+                text=f"Temps restant: {int(self.time_remaining)}s"
             )
     
     def end_game(self):
@@ -176,10 +212,10 @@ class PopUpGame:
             popup.destroy()
         self.popup_windows.clear()
         
-        # Afficher message de victoire
+        # Afficher message de victoire avec le score
         messagebox.showinfo(
-            "Félicitations!", 
-            f"Bravo! Vous avez fermé toutes les {self.windows_to_close} fenêtres!\n\n"
+            "Temps écoulé!", 
+            f"Bravo! Votre score final est de {self.closed_windows} fenêtres fermées!\n\n"
             "Maintenant, vous devez entrer le mot de passe secret..."
         )
         
@@ -351,7 +387,7 @@ class PopUpGame:
         message_label = tk.Label(
             victory_window,
             text="Vous avez réussi à :\n\n"
-                 f"✓ Fermer {self.windows_to_close} fenêtres pop-up\n"
+                 f"✓ Fermer {self.closed_windows} fenêtres pop-up en {self.time_limit} secondes\n"
                  "✓ Trouver le mot de passe secret\n"
                  "✓ Terminer le jeu avec succès!",
             font=("Arial", 14),
@@ -363,7 +399,7 @@ class PopUpGame:
         
         score_label = tk.Label(
             victory_window,
-            text=f"🏆 Score final: {self.closed_windows}/{self.windows_to_close} fenêtres fermées",
+            text=f"🏆 Score final: {self.closed_windows} fenêtres fermées",
             font=("Arial", 16, "bold"),
             fg="#f1c40f",
             bg="#2ecc71"
