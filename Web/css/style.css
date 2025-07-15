@@ -128,6 +128,7 @@ section li {
     cursor: pointer;
 }
 
+/* Encadré toujours visible */
 .encadre {
     flex-basis: 350px;
     background-color: #1a2b40;
@@ -137,21 +138,26 @@ section li {
     font-size: 1em;
     box-shadow: 0 0 10px rgba(0,0,0,0.4);
     min-height: 150px;
-
-    /* Animation */
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.4s ease, transform 0.4s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
+/* Texte à l'intérieur avec effet de fade */
+.texte-explication {
+    opacity: 1;
+    transition: opacity 0.4s ease;
+}
+.texte-explication.fade-out {
+    opacity: 0;
+}
+
 
 /* Quand l'encadré devient actif (texte affiché) */
 .encadre.visible {
     opacity: 1;
     transform: translateY(0);
 }
-
-
-
 
 /* === Footer === */
 footer {
