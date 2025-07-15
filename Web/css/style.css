@@ -108,6 +108,37 @@ section li {
     transform: translateY(-50%) translateX(10px);
 }
 
+.container {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    margin-top: 40px;
+}
+
+.texte {
+    flex: 1;
+    font-size: 1.2em;
+    color: #f5f5f5;
+}
+
+.mot-cle {
+    color: #3498db;
+    font-weight: bold;
+    border-bottom: 1px dashed #3498db;
+    cursor: pointer;
+}
+
+.encadre {
+    flex-basis: 350px;
+    background-color: #1a2b40;
+    padding: 20px;
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 1em;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    min-height: 150px;
+    transition: all 0.3s ease;
+}
 
 
 
