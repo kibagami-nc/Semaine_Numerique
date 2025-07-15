@@ -47,6 +47,11 @@ nav a:hover {
     background-color: #3498db;
 }
 
+.hacking {
+    color: red;
+
+}
+
 /* === Sections === */
 section {
     padding: 40px 20px;
