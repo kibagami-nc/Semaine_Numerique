@@ -137,8 +137,19 @@ section li {
     font-size: 1em;
     box-shadow: 0 0 10px rgba(0,0,0,0.4);
     min-height: 150px;
-    transition: all 0.3s ease;
+
+    /* Animation */
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
 }
+
+/* Quand l'encadré devient actif (texte affiché) */
+.encadre.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 
 
 
