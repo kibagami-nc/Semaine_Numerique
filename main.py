@@ -2,27 +2,29 @@ import tkinter as tk
 from tkinter import messagebox, simpledialog
 import random
 import time
-import threading
 
+import threading
+import os
 class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
     def __init__(self):
         self.score = 0
-        self.time_limit = 30  # Durée du jeu en secondes
-        self.time_remaining = 30 # Temps qu'il reste pour le jeu
+        self.time_limit = 30  # Durée du jeu en secondes (remis à 30 sec)
+        self.time_remaining = 30 # Temps qu'il reste pour le jeu (remis à 30 sec)
         self.closed_windows = 0
         self.game_active = False
         self.popup_windows = []
         self.main_window = None
         self.start_time = None
-        self.popup_delay = 2.0  # Délai initial entre les pop-ups
-        self.min_delay = 0.3  # Délai minimum entre les pop-ups
+        self.popup_delay = 1.0  # Délai initial entre les pop-ups (plus rapide)
+        self.min_delay = 0.15  # Délai minimum entre les pop-ups (plus rapide)
         
     def start_game(self):
         """Démarre le jeu principal"""
         self.main_window = tk.Tk()
-        self.main_window.title("Jeu Pop-Up - Défi Chronomètre!") # titre de la fenêtre
-        self.main_window.geometry("400x300") # taille de la fenêtre
-        self.main_window.configure(bg="#2c3e50") # couleur de fond
+        self.main_window.title("Jeu Pop-Up - Défi Chronomètre!")
+        self.main_window.geometry("400x300")
+        self.main_window.configure(bg="#2c3e50")
+        # self.main_window.attributes("-fullscreen", True)  # Plein écran supprimé
 
         # Interface principale, page pour start le jeu
         title_label = tk.Label(
@@ -128,17 +130,39 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
             self.popup_delay = max(self.min_delay, 2.0 - (2.0 * speed_factor))
     
     def create_popup_window(self, window_id):
-        """Crée une fenêtre pop-up individuelle"""
+        """Crée une fenêtre pop-up individuelle avec une image du dossier img (GIF ou PNG uniquement)"""
         popup = tk.Toplevel()
         popup.title(f"Pop-up #{window_id + 1}")
-        popup.geometry("250x150")
         popup.configure(bg="#e67e22")
-        
+        popup.resizable(False, False)  # Empêche le plein écran et le redimensionnement
+
+        # Charger une image GIF ou PNG du dossier img
+        img_folder = os.path.join(os.path.dirname(__file__), "img")
+        img_files = [f for f in os.listdir(img_folder) if f.lower().endswith((".gif", ".png"))]
+        if img_files:
+            img_path = os.path.join(img_folder, random.choice(img_files))
+            img_tk = tk.PhotoImage(file=img_path)
+            # Réduire l'image à 50% puis zoom aléatoire entre 1x et 2x
+            img_small = img_tk.subsample(2, 2)
+            zoom_factor = random.randint(1, 2)
+            img_zoomed = img_small.zoom(zoom_factor, zoom_factor)
+            img_width = img_zoomed.width()
+            img_height = img_zoomed.height()
+            img_label = tk.Label(popup, image=img_zoomed, bg="#e67e22")
+            img_label.image = img_zoomed  # garder une référence
+            img_label.pack(pady=5)
+            # Adapter la taille de la fenêtre à l'image zoomée
+            popup.geometry(f"{img_width}x{img_height}")
+        else:
+            img_label = tk.Label(popup, text="Aucune image trouvée", bg="#e67e22")
+            img_label.pack(pady=5)
+            popup.geometry("120x60")
+
         # Position aléatoire sur l'écran
         x = random.randint(100, 800)
         y = random.randint(100, 600)
-        popup.geometry(f"250x150+{x}+{y}")
-        
+        popup.geometry(f"+{x}+{y}")
+
         # Contenu de la fenêtre
         messages = [
             "FERMEZ-MOI!",
@@ -154,31 +178,28 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
         label = tk.Label(
             popup,
             text=random.choice(messages),
-            font=("Arial", 12, "bold"),
+            font=("Arial", 10, "bold"),
             fg="white",
             bg="#e67e22"
         )
-        label.pack(pady=20)
+        label.pack(pady=5)
         
         close_button = tk.Button(
             popup,
             text="✖ FERMER",
-            font=("Arial", 10, "bold"),
+            font=("Arial", 9, "bold"),
             bg="#c0392b",
             fg="white",
             command=lambda: self.close_popup(popup),
             relief="raised",
             bd=2
         )
-        close_button.pack(pady=10)
+        close_button.pack(pady=5)
         
-        # Empêcher la fermeture par la croix rouge (forcer l'utilisation du bouton)
         popup.protocol("WM_DELETE_WINDOW", lambda: self.close_popup(popup))
-        
-        # Rendre la fenêtre toujours au premier plan
         popup.attributes("-topmost", True)
         popup.focus_force()
-        
+
         self.popup_windows.append(popup)
     
     def close_popup(self, popup_window):
