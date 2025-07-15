@@ -74,9 +74,41 @@ section li {
     margin-bottom: 10px;
 }
 
-.Phising {
-    
+.Phishing {
+    position: relative;
+    cursor: help;
+    color: #3498db;
+    border-bottom: 1px dotted #3498db;
+    display: inline-block;
 }
+
+/* Tooltip qui s'affiche à droite */
+.tooltip {
+    visibility: hidden;
+    opacity: 0;
+    width: 300px; /* Largeur plus grande */
+    background-color: #222;
+    color: #fff;
+    text-align: left;
+    padding: 15px;
+    border-radius: 8px;
+    position: absolute;
+    top: 50%;
+    left: 110%; /* À droite de l'élément parent */
+    transform: translateY(-50%);
+    z-index: 100;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Apparition au survol */
+.Phishing:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(-50%) translateX(10px);
+}
+
+
 
 
 /* === Footer === */
