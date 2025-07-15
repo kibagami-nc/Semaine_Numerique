@@ -69,40 +69,6 @@ section li {
     margin-bottom: 10px;
 }
 
-/* === Formulaire de contact === */
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-form label {
-    font-weight: bold;
-}
-
-form input,
-form textarea {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1em;
-}
-
-form button {
-    background-color: #3498db;
-    color: #fff;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    font-size: 1em;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-form button:hover {
-    background-color: #2980b9;
-}
-
 /* === Footer === */
 footer {
     text-align: center;
