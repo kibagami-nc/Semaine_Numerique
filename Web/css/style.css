@@ -49,7 +49,6 @@ nav a:hover {
 
 .hacking {
     color: red;
-
 }
 
 /* === Sections === */
@@ -91,7 +90,7 @@ section li {
     color: #fff;
     text-align: left;
     padding: 15px;
-    border-radius: 8px;
+    border-radius: 5px;
     position: absolute;
     top: 50%;
     left: 110%; /* À droite de l'élément parent */
@@ -128,20 +127,26 @@ section li {
     cursor: pointer;
 }
 
-/* Encadré toujours visible */
-.encadre {
-    flex-basis: 350px;
+/* Encadré toujours visible et fixé à droite */
+.encadre-haut {
+    position: absolute;
+    top: 300px;                /* Position de départ */
+    right: 150px;
+    max-width: 300px;
+    min-height: 300px;
     background-color: #1a2b40;
     padding: 20px;
     border-radius: 10px;
     color: #ffffff;
     font-size: 1em;
     box-shadow: 0 0 10px rgba(0,0,0,0.4);
-    min-height: 150px;
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 1000;
+    transition: top 0.4s ease-in-out; /* Animation douce */
 }
+
 
 /* Texte à l'intérieur avec effet de fade */
 .texte-explication {
@@ -151,7 +156,6 @@ section li {
 .texte-explication.fade-out {
     opacity: 0;
 }
-
 
 /* Quand l'encadré devient actif (texte affiché) */
 .encadre.visible {
@@ -169,6 +173,15 @@ footer {
 }
 
 /* === Responsive === */
+@media (max-width: 900px) {
+    .encadre-haut {
+        position: static;
+        width: 100%;
+        margin-top: 20px;
+        max-width: none;
+    }
+}
+
 @media (max-width: 600px) {
     nav ul {
         flex-direction: column;
