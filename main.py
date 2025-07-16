@@ -1,10 +1,12 @@
 import tkinter as tk
 from tkinter import messagebox, simpledialog
+from Fonction.score import read_scores, add_score, save_scores
 import random
 import time
-
 import threading
 import os
+import webbrowser
+
 class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
     def __init__(self):
         self.score = 0
@@ -17,12 +19,17 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
         self.start_time = None
         self.popup_delay = 1.0  # Délai initial entre les pop-ups (plus rapide)
         self.min_delay = 0.15  # Délai minimum entre les pop-ups (plus rapide)
+        self.player_name = ""  # Pseudo du joueur
         
     def start_game(self):
         """Démarre le jeu principal"""
+        # D'abord demander le pseudo du joueur
+        if not self.get_player_name():
+            return  # Si l'utilisateur annule, ne pas démarrer le jeu
+            
         self.main_window = tk.Tk()
         self.main_window.title("Jeu Pop-Up - Défi Chronomètre!")
-        self.main_window.geometry("400x300")
+        self.main_window.geometry("400x350")
         self.main_window.configure(bg="#2c3e50")
         # self.main_window.attributes("-fullscreen", True)  # Plein écran supprimé
 
@@ -35,6 +42,16 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
             bg="#2c3e50"
         )
         title_label.pack(pady=20)
+        
+        # Affichage du pseudo du joueur
+        player_label = tk.Label(
+            self.main_window,
+            text=f"Joueur: {self.player_name}",
+            font=("Arial", 14, "bold"),
+            fg="#f39c12",
+            bg="#2c3e50"
+        )
+        player_label.pack(pady=5)
         
         instruction_label = tk.Label( # deuxième ligne d'instruction
             self.main_window,
@@ -87,6 +104,107 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
         quit_button.pack(pady=10)
         
         self.main_window.mainloop()
+    
+    def get_player_name(self):
+        """Demande le pseudo du joueur"""
+        # Créer une fenêtre temporaire pour saisir le pseudo
+        name_window = tk.Tk()
+        name_window.title("Entrez votre pseudo")
+        name_window.geometry("400x250")
+        name_window.configure(bg="#2c3e50")
+        name_window.resizable(False, False)
+        
+        # Centrer la fenêtre
+        name_window.update_idletasks()
+        width = name_window.winfo_width()
+        height = name_window.winfo_height()
+        x = (name_window.winfo_screenwidth() // 2) - (width // 2)
+        y = (name_window.winfo_screenheight() // 2) - (height // 2)
+        name_window.geometry(f'{width}x{height}+{x}+{y}')
+        
+        # Interface
+        title_label = tk.Label(
+            name_window,
+            text="🎮 Bienvenue au jeu POP-UP!",
+            font=("Arial", 16, "bold"),
+            fg="white",
+            bg="#2c3e50"
+        )
+        title_label.pack(pady=20)
+        
+        instruction_label = tk.Label(
+            name_window,
+            text="Entrez votre pseudo pour commencer:",
+            font=("Arial", 12),
+            fg="white",
+            bg="#2c3e50"
+        )
+        instruction_label.pack(pady=10)
+        
+        # Champ de saisie
+        name_entry = tk.Entry(
+            name_window,
+            font=("Arial", 14),
+            width=20,
+            relief="ridge",
+            bd=2
+        )
+        name_entry.pack(pady=10)
+        name_entry.focus()
+        
+        # Variable pour stocker le résultat
+        result = [False]  # Utiliser une liste pour pouvoir la modifier dans les fonctions imbriquées
+        
+        def validate_name():
+            name = name_entry.get().strip()
+            if len(name) >= 2:
+                self.player_name = name
+                result[0] = True
+                name_window.destroy()
+            else:
+                messagebox.showerror("Erreur", "Le pseudo doit contenir au moins 2 caractères!")
+                name_entry.focus()
+        
+        def cancel():
+            result[0] = False
+            name_window.destroy()
+        
+        # Boutons
+        button_frame = tk.Frame(name_window, bg="#2c3e50")
+        button_frame.pack(pady=20)
+        
+        validate_button = tk.Button(
+            button_frame,
+            text="VALIDER",
+            font=("Arial", 12, "bold"),
+            bg="#27ae60",
+            fg="white",
+            command=validate_name,
+            relief="raised",
+            bd=3,
+            padx=20
+        )
+        validate_button.pack(side=tk.LEFT, padx=10)
+        
+        cancel_button = tk.Button(
+            button_frame,
+            text="ANNULER",
+            font=("Arial", 12),
+            bg="#e74c3c",
+            fg="white",
+            command=cancel,
+            relief="raised",
+            bd=3,
+            padx=20
+        )
+        cancel_button.pack(side=tk.LEFT, padx=10)
+        
+        # Permettre la validation avec Entrée
+        name_window.bind('<Return>', lambda event: validate_name())
+        name_window.protocol("WM_DELETE_WINDOW", cancel)
+        
+        name_window.mainloop()
+        return result[0]
     
     def begin_popup_phase(self):
         """Commence la phase des pop-ups"""
@@ -385,9 +503,12 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
     
     def show_victory_screen(self):
         """Affiche l'écran de victoire final"""
+        # Sauvegarder le score avec le pseudo
+        top_scores = add_score(self.closed_windows, self.player_name)
+        
         victory_window = tk.Toplevel(self.main_window)
         victory_window.title("🎉 VICTOIRE!")
-        victory_window.geometry("500x400")
+        victory_window.geometry("600x500")
         victory_window.configure(bg="#2ecc71")
         victory_window.resizable(False, False)
         
@@ -403,11 +524,11 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
             fg="white",
             bg="#2ecc71"
         )
-        title_label.pack(pady=30)
+        title_label.pack(pady=20)
         
         message_label = tk.Label(
             victory_window,
-            text="Vous avez réussi à :\n\n"
+            text=f"Bravo {self.player_name}! Vous avez réussi à :\n\n"
                  f"✓ Fermer {self.closed_windows} fenêtres pop-up en {self.time_limit} secondes\n"
                  "✓ Trouver le mot de passe secret\n"
                  "✓ Terminer le jeu avec succès!",
@@ -416,7 +537,7 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
             bg="#2ecc71",
             justify="left"
         )
-        message_label.pack(pady=20)
+        message_label.pack(pady=15)
         
         score_label = tk.Label(
             victory_window,
@@ -425,37 +546,53 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
             fg="#f1c40f",
             bg="#2ecc71"
         )
-        score_label.pack(pady=20)
+        score_label.pack(pady=10)
+        
+        # Affichage des meilleurs scores
+        leaderboard_frame = tk.Frame(victory_window, bg="#2ecc71")
+        leaderboard_frame.pack(pady=15)
+        
+        leaderboard_title = tk.Label(
+            leaderboard_frame,
+            text="🏅 MEILLEURS SCORES 🏅",
+            font=("Arial", 14, "bold"),
+            fg="#f1c40f",
+            bg="#2ecc71"
+        )
+        leaderboard_title.pack()
+        
+        # Afficher les top 5 scores
+        scores_text = ""
+        for i, (pseudo, score) in enumerate(top_scores, 1):
+            medal = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else "🏅"
+            scores_text += f"{medal} {i}. {pseudo}: {score} fenêtres\n"
+        
+        scores_display = tk.Label(
+            leaderboard_frame,
+            text=scores_text,
+            font=("Arial", 12),
+            fg="white",
+            bg="#136133",
+            justify="left"
+        )
+        scores_display.pack(pady=5)
         
         # Boutons finaux
         button_frame = tk.Frame(victory_window, bg="#2ecc71")
         button_frame.pack(pady=30)
         
-        restart_button = tk.Button(
+        site_button = tk.Button(
             button_frame,
-            text="🔄 REJOUER",
+            text="🌐 SITE",
             font=("Arial", 12, "bold"),
             bg="#3498db",
             fg="white",
-            command=lambda: self.restart_game(victory_window),
             relief="raised",
             bd=3,
-            padx=20
+            padx=20,
+            command=lambda: webbrowser.open("https://kibagami-nc.github.io/POPUPS-WEB/")
         )
-        restart_button.pack(side=tk.LEFT, padx=15)
-        
-        quit_button = tk.Button(
-            button_frame,
-            text="🚪 QUITTER",
-            font=("Arial", 12, "bold"),
-            bg="#e74c3c",
-            fg="white",
-            command=self.quit_game,
-            relief="raised",
-            bd=3,
-            padx=20
-        )
-        quit_button.pack(side=tk.LEFT, padx=15)
+        site_button.pack(side=tk.LEFT, padx=15)
     
     def restart_game(self, victory_window):
         """Redémarre le jeu"""
