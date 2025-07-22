@@ -52,7 +52,7 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
             
         self.main_window = tk.Tk()
         self.main_window.title("Jeu Pop-Up - Défi Chronomètre!")
-        self.main_window.geometry("400x350")
+        self.main_window.geometry("400x400")
         self.main_window.configure(bg="#2c3e50")
         # self.main_window.attributes("-fullscreen", True)  # Plein écran supprimé
 
@@ -118,6 +118,8 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
         
         quit_button = tk.Button( # Bouton pour quitter le jeu
             self.main_window,
+            width=25,  # Largeur du bouton
+            height=5,  # Hauteur du bouton
             text="Quitter",
             font=("Arial", 12),
             bg="#95a5a6",
@@ -283,7 +285,7 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
         popup.resizable(False, False)  # Empêche le plein écran et le redimensionnement
 
         # Charger une image GIF ou PNG du dossier img
-        img_folder = os.path.join(os.path.dirname(__file__), "img")
+        img_folder = os.path.join(os.path.dirname(__file__), "Img")
         img_files = [f for f in os.listdir(img_folder) if f.lower().endswith((".gif", ".png"))]
         if img_files:
             img_path = os.path.join(img_folder, random.choice(img_files))
@@ -394,7 +396,7 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
         # Créer la fenêtre de mot de passe
         password_window = tk.Toplevel(self.main_window)
         password_window.title("Mot de passe requis")
-        password_window.geometry("400x300")
+        password_window.geometry("400x400")
         password_window.configure(bg="#34495e")
         password_window.resizable(False, False)
         
@@ -532,7 +534,7 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
         
         victory_window = tk.Toplevel(self.main_window)
         victory_window.title("🎉 VICTOIRE!")
-        victory_window.geometry("600x500")
+        victory_window.geometry("600x600")
         victory_window.configure(bg="#2ecc71")
         victory_window.resizable(False, False)
         
