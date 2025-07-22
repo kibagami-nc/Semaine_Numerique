@@ -396,7 +396,7 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
         # Créer la fenêtre de mot de passe
         password_window = tk.Toplevel(self.main_window)
         password_window.title("Mot de passe requis")
-        password_window.geometry("400x400")
+        password_window.geometry("800x500")
         password_window.configure(bg="#34495e")
         password_window.resizable(False, False)
         
