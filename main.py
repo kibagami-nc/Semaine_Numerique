@@ -282,8 +282,8 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
         popup.configure(bg="#e67e22")
         popup.resizable(False, False)  # Empêche le plein écran et le redimensionnement
 
-        # Charger une image GIF ou PNG du dossier img
-        img_folder = os.path.join(os.path.dirname(__file__), "img")
+        # Charger une image GIF ou PNG du dossier Img
+        img_folder = os.path.join(os.path.dirname(__file__), "Img")  # <-- Modifié ici
         img_files = [f for f in os.listdir(img_folder) if f.lower().endswith((".gif", ".png"))]
         if img_files:
             img_path = os.path.join(img_folder, random.choice(img_files))
