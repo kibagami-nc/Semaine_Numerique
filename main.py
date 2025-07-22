@@ -21,6 +21,29 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
         self.min_delay = 0.15  # Délai minimum entre les pop-ups (plus rapide)
         self.player_name = ""  # Pseudo du joueur
         
+        # Choisir le mot de passe au début du jeu
+        différents_mots_de_passe = [
+            "POPUP2025", "POPUP2024", "POPUP2023", "POPUP2022", "POPUP2021", "POPUP2020",
+        ]
+        self.correct_password = random.choice(différents_mots_de_passe)
+        self.password_parts = self.split_password()  # Diviser le mot de passe en parties
+        
+    def split_password(self):
+        """Divise le mot de passe en parties pour les afficher dans les titres des fenêtres"""
+        password = self.correct_password
+        # Diviser le mot de passe en 3-4 parties
+        if len(password) >= 8:
+            # Pour POPUP2025 par exemple : ["POP", "UP", "20", "25"]
+            part1 = password[:3]  # POP
+            part2 = password[3:5]  # UP
+            part3 = password[5:7]  # 20
+            part4 = password[7:]   # 25
+            return [part1, part2, part3, part4]
+        else:
+            # Pour des mots de passe plus courts, diviser en 2 parties
+            mid = len(password) // 2
+            return [password[:mid], password[mid:]]
+        
     def start_game(self):
         """Démarre le jeu principal"""
         # D'abord demander le pseudo du joueur
@@ -250,7 +273,12 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
     def create_popup_window(self, window_id):
         """Crée une fenêtre pop-up individuelle avec une image du dossier img (GIF ou PNG uniquement)"""
         popup = tk.Toplevel()
-        popup.title(f"Pop-up #{window_id + 1}")
+        
+        # Choisir une partie du mot de passe pour le titre
+        if self.password_parts:
+            password_part = self.password_parts[window_id % len(self.password_parts)]
+            popup.title(f"[{password_part}]")
+            
         popup.configure(bg="#e67e22")
         popup.resizable(False, False)  # Empêche le plein écran et le redimensionnement
 
@@ -469,16 +497,9 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
     
     def validate_password(self, password_window):
         """Valide le mot de passe saisi"""
-        # Liste des différents mots de passe possibles
-        différents_mots_de_passe = [
-            "POPUP2025", "POPUP2024", "POPUP2023", "POPUP2022", "POPUP2021", "POPUP2020",
-        ]
-        
-        # Mot de passe choisi aléatoirement dans la liste
-        correct_password = random.choice(différents_mots_de_passe)  # Mot de passe secret
         entered_password = self.password_entry.get().upper()
         
-        if entered_password == correct_password:
+        if entered_password == self.correct_password:
             # Mot de passe correct
             password_window.destroy()
             self.show_victory_screen()
@@ -498,6 +519,9 @@ class PopUpGame: # rename demande d'amie pour faire comme dans la mission GTA ?
             "Le mot de passe est composé de :\n\n"
             "• Le nom du jeu (en majuscules)\n"
             "• Suivi de l'année actuelle\n\n"
+            "💡 ASTUCE SPÉCIALE :\n"
+            "Regardez attentivement les titres des fenêtres pop-up...\n"
+            "Elles contiennent des parties du mot de passe !\n\n"
             "Exemple: MOTDEPASSE2024"
         )
     
